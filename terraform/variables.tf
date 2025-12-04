@@ -16,7 +16,7 @@ variable "instance_type" {
 variable "ami" {
   type    = string
   # Amazon Linux 2 / General AMI - change if you want Ubuntu
-  default = "ami-0c2b8ca1dad447f8a" # replace with region-appropriate AMI
+  default = "ami-0ecb62995f68bb549" # replace with region-appropriate AMI
 }
 
 variable "key_name" {
