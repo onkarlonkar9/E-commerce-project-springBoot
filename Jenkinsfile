@@ -12,7 +12,6 @@ pipeline {
         RDS_ENDPOINT = "${params.RDS_ENDPOINT}"
         DB_USERNAME = "${params.DB_USERNAME}"
         DB_PASSWORD = "${params.DB_PASSWORD}"
-        APP_JAR = "target/ecommerce-0.0.1-SNAPSHOT.jar"
         REMOTE_APP_DIR = "/opt/ecommerce"
     }
 
@@ -24,6 +23,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -32,7 +32,9 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh "mvn -B -DskipTests clean package"
+                dir('JtProject') {
+                    sh "mvn -B -DskipTests clean package"
+                }
             }
         }
 
@@ -40,42 +42,17 @@ pipeline {
             steps {
                 sshagent (credentials: [env.SSH_CREDENTIALS]) {
                     script {
-                        sh "ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'sudo mkdir -p ${REMOTE_APP_DIR} && sudo chown ${EC2_USER}:${EC2_USER} ${REMOTE_APP_DIR}'"
-                        sh "scp -o StrictHostKeyChecking=no ${APP_JAR} ${EC2_USER}@${EC2_HOST}:${REMOTE_APP_DIR}/app.jar"
+                        sh """
+                          ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} \
+                          'sudo mkdir -p ${REMOTE_APP_DIR} && sudo chown ${EC2_USER}:${EC2_USER} ${REMOTE_APP_DIR}'
+                        """
+
+                        // Upload JAR from correct folder
+                        sh """
+                          scp -o StrictHostKeyChecking=no JtProject/target/*.jar \
+                          ${EC2_USER}@${EC2_HOST}:${REMOTE_APP_DIR}/app.jar
+                        """
 
                         def service = """
                         [Unit]
-                        Description=Ecommerce Spring Boot App
-                        After=network.target
-
-                        [Service]
-                        User=${EC2_USER}
-                        WorkingDirectory=${REMOTE_APP_DIR}
-                        ExecStart=/usr/bin/java -jar ${REMOTE_APP_DIR}/app.jar --spring.datasource.url=jdbc:mysql://${RDS_ENDPOINT}:3306/ecomdb --spring.datasource.username=${DB_USERNAME} --spring.datasource.password=${DB_PASSWORD}
-                        Restart=always
-                        RestartSec=10
-
-                        [Install]
-                        WantedBy=multi-user.target
-                        """
-
-                        sh "ssh ${EC2_USER}@${EC2_HOST} 'echo \"${service}\" | sudo tee /etc/systemd/system/ecommerce.service > /dev/null'"
-                        sh "ssh ${EC2_USER}@${EC2_HOST} 'sudo systemctl daemon-reload && sudo systemctl restart ecommerce.service'"
-                    }
-                }
-            }
-        }
-
-        stage('Health Check') {
-            steps {
-                sh "sleep 10"
-                sh "ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'curl -s --fail http://localhost:8080/ || exit 1'"
-            }
-        }
-    }
-
-    post {
-        success { echo "Deployment successful!" }
-        failure { echo "Deployment failed!" }
-    }
-}
+                        Description=Ecommerce Spring Boot
