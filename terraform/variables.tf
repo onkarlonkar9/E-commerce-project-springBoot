@@ -21,7 +21,7 @@ variable "ami" {
 
 variable "key_name" {
   type        = string
-  description = "Existing AWS key pair name to associate with EC2"
+  default = e-com
 }
 
 variable "db_engine" {
