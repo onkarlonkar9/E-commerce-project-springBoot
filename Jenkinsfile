@@ -73,8 +73,13 @@ EOF"'
 
         stage('Health Check') {
             steps {
-                sh "sleep 10"
-                sh "ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} 'curl -s --fail http://localhost:8080/ || exit 1'"
+                sshagent (credentials: [env.SSH_CREDENTIALS]) {
+                    sh """
+                        sleep 10
+                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} \\
+                        'curl -s --fail http://localhost:8080/ || exit 1'
+                    """
+                }
             }
         }
     }
