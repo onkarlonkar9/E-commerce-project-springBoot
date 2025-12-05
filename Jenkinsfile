@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        EC2_USER = 'ec2-user'
+        EC2_USER = 'ubuntu'
         EC2_HOST = "${params.EC2_HOST}"
         SSH_CREDENTIALS = 'ec2-ssh'
         RDS_ENDPOINT = "${params.RDS_ENDPOINT}"
