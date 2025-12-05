@@ -16,7 +16,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'EC2_HOST', defaultValue: '100.31.236.255')
+        string(name: 'EC2_HOST', defaultValue: '44.203.248.201')
         string(name: 'RDS_ENDPOINT', defaultValue: 'ecommerce-spring-db.ccjcemigy0tm.us-east-1.rds.amazonaws.com')
         string(name: 'DB_USERNAME', defaultValue: 'ecomadmin')
         password(name: 'DB_PASSWORD', defaultValue: 'test1234')
