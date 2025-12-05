@@ -19,7 +19,7 @@ pipeline {
         string(name: 'EC2_HOST', description: 'EC2 Public IP')
         string(name: 'RDS_ENDPOINT', description: 'RDS endpoint')
         string(name: 'DB_USERNAME', defaultValue: 'ecomadmin')
-        password(name: 'DB_PASSWORD', defaultValue: '')
+        password(name: 'DB_PASSWORD', defaultValue: 'test1234')
     }
 
     stages {
